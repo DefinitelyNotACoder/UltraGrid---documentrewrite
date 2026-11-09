@@ -341,10 +341,10 @@ frame_wait_obj_notify(struct video_frame *f)
 }
 
 /**
- * This function captures video and possibly compresses it.
- * It then delegates sending to another thread.
+ * Feeds captured video into the compression pipeline. The RXTX sender
+ * consumes its output on a separate thread.
  *
- * @param[in] arg pointer to UltraGrid (root) module
+ * @param[in] arg pointer to the application state
  */
 static void *capture_thread(void *arg)
 {
@@ -383,9 +383,9 @@ static void *capture_thread(void *arg)
 
                 rxtx_send_video(uv->state_rxtx, tx_frame);
 
-                // wait for frame frame to be processed, eg. by compress
-                // or sender (uncompressed video). Grab invalidates previous
-                // frame (if not defined dispose function).
+                // Without a disposal callback from the capture driver, the
+                // next grab may reuse this buffer. Wait for the last downstream
+                // owner to release it before asking the driver for a new frame.
                 if (wait_for_cur_uncompressed_frame) {
                         wait_obj_wait(wait_obj);
                         tx_frame->callbacks.dispose       = nullptr;

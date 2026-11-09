@@ -244,6 +244,9 @@ shared_ptr_dispose(struct video_frame *f)
         delete d;
 }
 
+// The C transport owns a raw pointer until it calls dispose. Keep the
+// shared owner in the callback data and restore the original callback before
+// dropping that reference, since the deleter may call the original callback.
 static struct video_frame *
 shared_vf_to_plain(shared_ptr<video_frame> &&frame)
 {

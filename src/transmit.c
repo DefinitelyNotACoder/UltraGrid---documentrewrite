@@ -448,6 +448,8 @@ tx_send(struct tx *tx, struct video_frame *frame, struct rtp *rtp_session)
             (frame->flags & TIMESTAMP_VALID) == 0
                 ? get_local_mediatime()
                 : get_local_mediatime_offset() + frame->timestamp;
+        // All fragments of one frame must keep the same RTP timestamp so
+        // the receiver can group them even when they arrive out of order.
         if(frame->fragment &&
                         tx->last_frame_fragment_id == frame->frame_fragment_id) {
                 ts = tx->last_ts;

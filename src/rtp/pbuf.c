@@ -557,13 +557,9 @@ void pbuf_remove(struct pbuf *playout_buf, time_ns_t curr_time)
 
 static int frame_complete(struct pbuf_node *frame)
 {
-        /* Return non-zero if the list of coded_data represents a    */
-        /* complete frame of video. This might have to be passed the */
-        /* seqnum of the last packet in the previous frame, too?     */
-        /* i dont think that would reflect correctly of weather this */
-        /* frame is complete or not - however we should check for all */
-        /* the packets of a frame being present - perhaps we should  */
-        /* keep a bit vector in pbuf_node? LG.  */
+        /* A marker or the start of a newer frame makes this group eligible
+         * for decode after the playout deadline. Packets may still be missing.
+         * Payload reassembly and FEC handle missing data downstream. */
 
         return (frame->mbit == 1 || frame->completed == true);
 }

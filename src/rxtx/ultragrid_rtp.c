@@ -294,6 +294,9 @@ send_video_frame(void *state, struct video_frame *tx_frame)
         }
         rtp_rxtx_sender_do_housekeeping(s->rtp_common, TX_MEDIA_VIDEO);
 
+        // The worker borrows this shared argument slot. Joining the previous
+        // task above lets us reuse the slot while the next frame's FEC encoding
+        // can overlap this worker's packet transmission.
         s->async_data.s = s;
         s->async_data.f = tx_frame;
         s->async_sending_task = task_run_async(send_video_frame_async_callback, &s->async_data);
